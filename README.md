@@ -22,6 +22,8 @@ Base64EncodedSignature#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","
 
 Where `Base64EncodedSignature` are 256 bytes of an RSA signature signed with a 2048-bit public key and PKCS#1 v1.5 padding, followed by a `#` delimiter, and then the signed JSON data as defined in https://github.com/MohGovIL/Ramzor#minimal-dataset
 
+Note: **The current MOH implementation has a pitfall.** The JSON data is not signed as is, but rather the **SHA256 hash** of the data is signed.
+
 ### Certificates
 
 The Ministry of Healthy RSA certificate seems to be available at https://ramzorfiles.z6.web.core.windows.net/RamzorQRPubKey.der
@@ -124,7 +126,7 @@ Convert the DER formatted certificate to a PEM file:
 $ openssl x509 -pubkey -noout -inform der -in certs/RamzorQRPubKey.der > certs/RamzorQRPubKey.pem
 ```
 
-Assumed the signed JSON data (without any trailing whitespace) is in `data.json`. Before we verify the data we need to hash the signed JSON (this is likely an implementation error by MOH!):
+Assumed the signed JSON data (without any trailing whitespace) is in `data.json`. Before we verify the data we need to hash the signed JSON:
 
 ```bash
 $ openssl dgst -binary -sha256 data.json > data.hash

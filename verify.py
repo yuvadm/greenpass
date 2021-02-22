@@ -1,7 +1,6 @@
 import base64
 
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 sig = base64.b64decode("base64EncodedSignature==")
