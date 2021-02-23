@@ -12,6 +12,8 @@ It requires the [`cryptography`](https://pypi.org/project/cryptography/) package
 
 ## Verification Process Details
 
+We describe in detail the signature verification steps using `openssl` commands.
+
 ### QR Code Data
 
 Scan a Green Pass QR code, the encoded data has the following format:
