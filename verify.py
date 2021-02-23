@@ -1,4 +1,5 @@
 import base64
+import json
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -21,3 +22,8 @@ with open("certs/RamzorQRPubKey.pem", "rb") as f:
         padding.PKCS1v15(),
         hashes.SHA256(),
     )
+
+json_data = json.loads(payload)
+print('Israeli ID Number ', json_data['p'][0]['idl'])
+print('ID valid by ', json_data['p'][0]['e'])
+print('Cert Unique ID =', json_data['id'])
