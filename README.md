@@ -22,9 +22,9 @@ Scan a Green Pass QR code, the encoded data has the following format:
 Base64EncodedSignature#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","et":1,"ct":1,"c":"IL MOH","cn":null,"fn":null,"g":null,"f":null,"gl":null,"fl":null,"idp":null,"idl":null,"b":"0001-01-01","e":"0001-01-01","a":"0001-01-01","p":[{"idl":"0123456789","e":"2021-01-01"}]}
 ```
 
-Where `Base64EncodedSignature` are 256 bytes of an RSA signature signed with a 2048-bit public key and PKCS#1 v1.5 padding, followed by a `#` delimiter, and then the signed JSON data as defined in https://github.com/MohGovIL/Ramzor#minimal-dataset
+Where `Base64EncodedSignature` are 256 bytes of an RSA signature signed with a 2048-bit public key and PKCS#1 v1.5 padding, followed by a `#` delimiter, and then the signed JSON payload as defined in https://github.com/MohGovIL/Ramzor#minimal-dataset
 
-Note: **The current MOH implementation has a pitfall.** The JSON data is not signed as is, but rather the **SHA256 hash** of the data is signed.
+⚠️ **The current MOH implementation has a pitfall.** ⚠️ The JSON payload is not signed as is, but rather the **SHA256 hash** of the data is signed.
 
 ### Certificates
 
