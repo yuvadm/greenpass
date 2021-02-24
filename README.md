@@ -24,7 +24,7 @@ Base64EncodedSignature#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","
 
 Where `Base64EncodedSignature` are 256 bytes of an RSA signature signed with a 2048-bit public key and PKCS#1 v1.5 padding, followed by a `#` delimiter, and then the signed JSON payload as defined in https://github.com/MohGovIL/Ramzor#minimal-dataset
 
-⚠️ **The current MOH implementation has a pitfall.** ⚠️ The JSON payload is not signed as is, but rather the **SHA256 hash** of the data is signed.
+⚠️ **The current MOH implementation has a pitfall.** ⚠️ The JSON payload is not signed as is, but rather the **SHA256 hash** of the data is signed. This effectively means the payload is hashed twice, once manually, and once as part of the signature verification scheme.
 
 ### Certificates
 
