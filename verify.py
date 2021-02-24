@@ -8,10 +8,8 @@ sig = base64.b64decode("base64EncodedSignature==")
 
 payload = '{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","et":1,"ct":1,"c":"IL MOH","cn":null,"fn":null,"g":null,"f":null,"gl":null,"fl":null,"idp":null,"idl":null,"b":"0001-01-01","e":"0001-01-01","a":"0001-01-01","p":[{"idl":"0123456789","e":"2021-01-01"}]}'
 
-pl = payload.encode("utf-8")
-
 h = hashes.Hash(hashes.SHA256())
-h.update(pl)
+h.update(payload.encode("utf-8"))
 digest = h.finalize()
 
 with open("certs/RamzorQRPubKey.pem", "rb") as f:
@@ -23,7 +21,8 @@ with open("certs/RamzorQRPubKey.pem", "rb") as f:
         hashes.SHA256(),
     )
 
-json_data = json.loads(payload)
-print('Israeli ID Number ', json_data['p'][0]['idl'])
-print('ID valid by ', json_data['p'][0]['e'])
-print('Cert Unique ID =', json_data['id'])
+
+data = json.loads(payload)
+print(f"Israeli ID Number {data['p'][0]['idl']}")
+print(f"ID valid by {data['p'][0]['e']}")
+print(f"Cert Unique ID {data['id']}")
