@@ -8,7 +8,16 @@ As (not really) specified in https://github.com/MohGovIL/Ramzor
 
 A pythonic implementation of the verification process can be found in [`verify.py`](verify.py).
 
-It requires the [`cryptography`](https://pypi.org/project/cryptography/) package to be installed.
+Run the following command to install the dependency packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+Save your Green Pass as a `.png` file and execute:
+```bash
+python verify.py path_to_my_green_pass_image.png
+```
 
 ## Verification Process Details
 
