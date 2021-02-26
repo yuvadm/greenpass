@@ -1,8 +1,8 @@
 import argparse
-import pathlib
 import base64
 import json
-import os
+
+from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -12,8 +12,7 @@ from pyzbar import pyzbar
 
 
 def cert(name):
-    this_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(this_dir, 'certs', name)
+    return Path(__file__).absolute().parent / 'certs' / name
 
 
 def verify(qr_code_bytes):
@@ -32,6 +31,7 @@ def verify(qr_code_bytes):
             padding.PKCS1v15(),
             hashes.SHA256(),
         )
+
     data = json.loads(payload)
 
     print("Valid signature!")
@@ -44,12 +44,24 @@ def read_qr_code(image_path):
     return pyzbar.decode(Image.open(image_path))[0].data
 
 
-def parse_args():
-    args = argparse.ArgumentParser("GreenPass QR code verifier")
-    args.add_argument("image_path", type=pathlib.Path)
-    return args.parse_args()
+def create_arg_parser():
+    parser = argparse.ArgumentParser("GreenPass QR code verifier")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-i", "--image_path", type=Path, help="Path to an image with the QR code", default=None)
+    group.add_argument(
+        "-t", "--txt_path", type=Path, help="Path to decoded QR code textual content", default=None)
+    return parser
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    verify(read_qr_code(args.image_path))
+    # Parse arguments
+    parser = create_arg_parser()
+    args = parser.parse_args()
+
+    # Choose correct input
+    if args.image_path:
+        verify(read_qr_code(args.image_path))
+    elif args.txt_path:
+        with open(args.txt_path, 'rb') as f:
+            verify(f.read().strip())
