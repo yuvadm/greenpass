@@ -20,7 +20,7 @@ pipenv install
 #### Option 1 - from QR code image
 Save your Green Pass as a `.png` file and execute:
 ```bash
-pipenv run verify.py -i green_pass_image.png
+pipenv run python verify.py -i green_pass_image.png
 ```
 
 #### Option 2 - from QR code decoded textual content
@@ -35,7 +35,7 @@ base64EncodedSignature==#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234"
 And then execute:
 
 ```bash
-pipenv run verify.py -t textual_payload.txt
+pipenv run python verify.py -t textual_payload.txt
 ```
 
 ### Output example
