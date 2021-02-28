@@ -23,6 +23,15 @@ with open("certs/RamzorQRPubKey.pem", "rb") as f:
 
 
 data = json.loads(payload)
-print(f"Israeli ID Number {data['p'][0]['idl']}")
-print(f"ID valid by {data['p'][0]['e']}")
-print(f"Cert Unique ID {data['id']}")
+if data['ct'] == 1:
+	for i in range(len(data['p'])):
+		print(f"Details of person number {i+1}:")
+		print(f"\tIsraeli ID Number {data['p'][i]['idl']}")
+		print(f"\tID valid by {data['p'][i]['e']}")
+	print(f"Cert Unique ID {data['id']}")
+elif data['ct'] == 2:
+	print(f"Israeli ID Number {data['idl']}")
+	print(f"ID valid by {data['e']}")
+	print(f"Cert Unique ID {data['id']}")
+else:
+	print("Unsupported certificate type")
