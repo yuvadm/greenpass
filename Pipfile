@@ -1,4 +1,11 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
 [packages]
 cryptography = "*"
 pillow = "*"
 pyzbar = "*"
+
+[dev-packages]
