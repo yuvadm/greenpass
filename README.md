@@ -23,7 +23,7 @@ pipenv sync
 Save your Green Pass as a `.png` file and execute:
 
 ```bash
-pipenv run python verify.py -i green_pass_image.png
+pipenv run verify -i green_pass_image.png
 ```
 
 #### Option 2 - from QR code decoded textual content
@@ -31,7 +31,7 @@ pipenv run python verify.py -i green_pass_image.png
 Decode the QR code payload yourself, put it in a txt file and then execute:
 
 ```bash
-pipenv run python verify.py -t green_pass_payload.txt
+pipenv run verify -t green_pass_payload.txt
 ```
 
 ### Output example

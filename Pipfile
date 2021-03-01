@@ -9,3 +9,6 @@ pillow = "*"
 pyzbar = "*"
 
 [dev-packages]
+
+[scripts]
+verify = "python verify.py"
