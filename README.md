@@ -8,7 +8,44 @@ As (not really) specified in https://github.com/MohGovIL/Ramzor
 
 A pythonic implementation of the verification process can be found in [`verify.py`](verify.py).
 
-It requires the [`cryptography`](https://pypi.org/project/cryptography/) package to be installed.
+### Setup
+
+Install [`pipenv`](https://pypi.org/project/pipenv/) and execute:
+```bash
+pipenv install
+```
+
+### Usage
+
+#### Option 1 - from QR code image
+Save your Green Pass as a `.png` file and execute:
+```bash
+pipenv run python verify.py -i green_pass_image.png
+```
+
+#### Option 2 - from QR code decoded textual content
+
+Decode the QR code payload yourself, put it in a txt file:
+
+*textual_payload.txt*
+```json
+base64EncodedSignature==#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","et":1,"ct":1,"c":"IL MOH","cn":null,"fn":null,"g":null,"f":null,"gl":null,"fl":null,"idp":null,"idl":null,"b":"0001-01-01","e":"0001-01-01","a":"0001-01-01","p":[{"idl":"012345678","e":"2021-01-01"}]}
+```
+
+And then execute:
+
+```bash
+pipenv run python verify.py -t textual_payload.txt
+```
+
+### Output example
+
+```
+Valid signature!
+Israeli ID Number 012345678
+ID valid by 2021-01-01
+Cert Unique ID 01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234
+```
 
 ## Verification Process Details
 

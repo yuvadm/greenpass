@@ -1,0 +1,4 @@
+[packages]
+cryptography = "*"
+pillow = "*"
+pyzbar = "*"
