@@ -104,9 +104,9 @@ class GreenPassVerifier(object):
                     padding.PKCS1v15(),
                     hashes.SHA256(),
                 )
-                click.secho("Valid signature!", fg="green", bold=True)
+                click.secho("✅ Valid signature!", fg="green", bold=True)
             except InvalidSignature:
-                click.secho("Invalid signature!", fg="red", bold=True)
+                click.secho("❌ Invalid signature!", fg="red", bold=True)
 
 
 @click.command()

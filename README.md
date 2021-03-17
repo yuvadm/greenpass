@@ -47,10 +47,10 @@ $ pipenv run verify -t green_pass_payload.txt
 ### Output example
 
 ```
-Israeli ID Number 012345678
-ID valid by 2021-01-01
-Cert Unique ID 01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234
-Valid signature!
+    Israeli ID Number 012345678
+    ID valid by 2021-01-01
+    Cert Unique ID 01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234
+✅ Valid signature!
 ```
 
 ## Verification Process Details
