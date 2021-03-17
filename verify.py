@@ -13,80 +13,98 @@ from PIL import Image
 from pyzbar import pyzbar
 
 
-def cert(name):
-    return Path(__file__).absolute().parent / "certs" / name
+class GreenPassVerifier(object):
+    def __init__(self, data_bytes):
+        sig, self.payload = data_bytes.split(b"#", maxsplit=1)
+        self.signature = base64.decodebytes(sig)
+        self.data = json.loads(self.payload)
 
+        self.validate_data()
+        self.details = self.get_details()
+        self.digest = self.get_digest()
 
-def verify(qr_code_bytes):
-    b64, payload = qr_code_bytes.split(b"#", maxsplit=1)
-    sig = base64.decodebytes(b64)
+        self.cert = self.get_cert_path("RamzorQRPubKey.pem")
 
-    data = json.loads(payload)
-    payload = payload.decode().encode("utf8")
+    @classmethod
+    def from_txt(cls, path):
+        with open(path, "rb") as f:
+            return cls(f.read().strip())
 
-    details = []
+    @classmethod
+    def from_qr(cls, path):
+        return cls(pyzbar.decode(Image.open(path))[0].data)
 
-    if data["ct"] == 1:
-        digest = payload
-        for i in range(len(data["p"])):
+    @classmethod
+    def from_pdf(cls, path):
+        doc = fitz.open(path)
+        for i in range(len(doc)):
+            for img in doc.get_page_images(i):
+                xref, width = img[0], img[2]
+                if width in (
+                    3720,  # in green pass
+                    4200,  # in vaccination certificate
+                ):
+                    img = fitz.Pixmap(doc, xref)
+                    data = img.getImageData(output="png")
+                    return cls(BytesIO(data))
+
+    def validate_data(self):
+        if self.data["ct"] not in (1, 2):
+            raise Exception(f"Unsupported certificate type ct={ct}")
+
+    def get_cert_path(self, name):
+        return Path(__file__).absolute().parent / "certs" / name
+
+    def get_details(self):
+        details = []
+        data = self.data
+        if data["ct"] == 1:
+            for i in range(len(data["p"])):
+                self.details.append(
+                    {
+                        "id_num": data["p"][i]["idl"],
+                        "valid_by": data["p"][i]["e"],
+                        "cert_id": data["id"],
+                    }
+                )
+        elif data["ct"] == 2:
             details.append(
                 {
-                    "id_num": data["p"][i]["idl"],
-                    "valid_by": data["p"][i]["e"],
+                    "id_num": data["idl"],
+                    "valid_by": data["e"],
                     "cert_id": data["id"],
                 }
             )
-    elif data["ct"] == 2:
-        h = hashes.Hash(hashes.SHA256())
-        h.update(payload)
-        digest = h.finalize()
-        details.append(
-            {
-                "id_num": data["idl"],
-                "valid_by": data["e"],
-                "cert_id": data["id"],
-            }
-        )
+        return details
 
-    else:
-        click.secho("Unsupported certificate type", fg="red")
-        return
+    def get_digest(self):
+        ct = self.data["ct"]
+        if ct == 1:
+            digest = self.payload.decode().encode("utf8")
+        elif ct == 2:
+            h = hashes.Hash(hashes.SHA256())
+            h.update(self.payload)
+            digest = h.finalize()
+        return digest
 
-    for d in details:
-        click.echo(f"\tIsraeli ID Number {d['id_num']}")
-        click.echo(f"\tID valid by {d['valid_by']}")
-        click.echo(f"\tCert Unique ID {d['cert_id']}")
+    def verify(self):
+        for d in self.details:
+            click.echo(f"\tIsraeli ID Number {d['id_num']}")
+            click.echo(f"\tID valid by {d['valid_by']}")
+            click.echo(f"\tCert Unique ID {d['cert_id']}")
 
-    with open(cert("RamzorQRPubKey.pem"), "rb") as f:
-        k = serialization.load_pem_public_key(f.read())
-        try:
-            k.verify(
-                sig,
-                digest,
-                padding.PKCS1v15(),
-                hashes.SHA256(),
-            )
-            click.secho("Valid signature!", fg="green", bold=True)
-        except InvalidSignature:
-            click.secho("Invalid signature!", fg="red", bold=True)
-
-
-def read_qr_code(image_path):
-    return pyzbar.decode(Image.open(image_path))[0].data
-
-
-def read_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
-    for i in range(len(doc)):
-        for img in doc.get_page_images(i):
-            xref, width = img[0], img[2]
-            if width in (
-                3720,  # in green pass
-                4200,  # in vaccination certificate
-            ):
-                img = fitz.Pixmap(doc, xref)
-                data = img.getImageData(output="png")
-                return read_qr_code(BytesIO(data))
+        with open(self.cert, "rb") as f:
+            k = serialization.load_pem_public_key(f.read())
+            try:
+                k.verify(
+                    self.signature,
+                    self.digest,
+                    padding.PKCS1v15(),
+                    hashes.SHA256(),
+                )
+                click.secho("Valid signature!", fg="green", bold=True)
+            except InvalidSignature:
+                click.secho("Invalid signature!", fg="red", bold=True)
 
 
 @click.command()
@@ -105,12 +123,11 @@ def read_pdf(pdf_path):
 )
 def verify_cmd(pdf_path="", image_path="", txt_path=""):
     if image_path:
-        verify(read_qr_code(image_path))
+        verifier = GreenPassVerifier.from_qr(image_path)
     elif pdf_path:
-        verify(read_pdf(pdf_path))
+        verifier = GreenPassVerifier.from_pdf(pdf_path)
     elif txt_path:
-        with open(txt_path, "rb") as f:
-            verify(f.read().strip())
+        verifier = GreenPassVerifier.from_payload(txt_path)
     else:
         ctx = click.get_current_context()
         click.echo(ctx.get_help())
