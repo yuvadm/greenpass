@@ -189,3 +189,7 @@ Verified OK
 ```
 
 and receive successful verification.
+
+## License
+
+[GPLv3](LICENSE)
