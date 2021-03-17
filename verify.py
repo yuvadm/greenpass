@@ -67,7 +67,7 @@ def read_pdf(pdf_path):
             ):
                 img = fitz.Pixmap(doc, xref)
                 data = img.getImageData(output="png")
-                return pyzbar.decode(Image.open(BytesIO(data)))[0].data
+                return read_qr_code(BytesIO(data))
 
 
 def create_arg_parser():
