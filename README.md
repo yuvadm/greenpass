@@ -179,6 +179,8 @@ Assumed the signed JSON data (without any trailing whitespace) is in `data.json`
 $ openssl dgst -binary -sha256 data.json > data.hash
 ```
 
+This redundant hash step should be skipped in case the `ct` value in the payload is equal to `2`.
+
 Assuming the Base64-decoded signature bytes are in `sig.bin` we can now run:
 
 ```bash
