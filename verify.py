@@ -3,6 +3,7 @@ import base64
 import fitz
 import json
 
+from io import BytesIO
 from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
@@ -57,9 +58,17 @@ def read_qr_code(image_path):
 
 def read_pdf(pdf_path):
     doc = fitz.open(pdf_path)
-    for (xref, *_) in doc.get_page_images(0, full=True):
-        img = fitz.Pixmap(doc, xref)
-        img.writePNG(f"{xref}.png")
+    for i in range(len(doc)):
+        for img in doc.get_page_images(i):
+            xref, width = img[0], img[2]
+            if width in (
+                3720,  # in green pass
+                4200,  # in vaccination certificate
+            ):
+                img = fitz.Pixmap(doc, xref)
+                data = img.getImageData(output="png")
+                return pyzbar.decode(Image.open(BytesIO(data)))[0].data
+
 
 def create_arg_parser():
     parser = argparse.ArgumentParser("Green Pass QR code verifier")
@@ -95,7 +104,7 @@ if __name__ == "__main__":
     if args.image_path:
         verify(read_qr_code(args.image_path))
     elif args.pdf_path:
-        read_pdf(args.pdf_path)
+        verify(read_pdf(args.pdf_path))
     elif args.txt_path:
         with open(args.txt_path, "rb") as f:
             verify(f.read().strip())
