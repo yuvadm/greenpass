@@ -26,7 +26,7 @@ class GreenPassVerifier(object):
         self.cert = self.get_cert_path("RamzorQRPubKey.pem")
 
     @classmethod
-    def from_txt(cls, path):
+    def from_payload(cls, path):
         with open(path, "rb") as f:
             return cls(f.read().strip())
 
@@ -46,10 +46,11 @@ class GreenPassVerifier(object):
                 ):
                     img = fitz.Pixmap(doc, xref)
                     data = img.getImageData(output="png")
-                    return cls(BytesIO(data))
+                    return cls.from_qr(BytesIO(data))
 
     def validate_data(self):
-        if self.data["ct"] not in (1, 2):
+        ct = self.data["ct"]
+        if ct not in (1, 2):
             raise Exception(f"Unsupported certificate type ct={ct}")
 
     def get_cert_path(self, name):
@@ -60,7 +61,7 @@ class GreenPassVerifier(object):
         data = self.data
         if data["ct"] == 1:
             for i in range(len(data["p"])):
-                self.details.append(
+                details.append(
                     {
                         "id_num": data["p"][i]["idl"],
                         "valid_by": data["p"][i]["e"],
@@ -132,6 +133,8 @@ def verify_cmd(pdf_path="", image_path="", txt_path=""):
         ctx = click.get_current_context()
         click.echo(ctx.get_help())
         ctx.exit()
+
+    verifier.verify()
 
 
 if __name__ == "__main__":
