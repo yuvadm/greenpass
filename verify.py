@@ -123,7 +123,7 @@ class GreenPassVerifier(object):
     type=click.Path(exists=True),
     help="Path to decoded QR code textual content",
 )
-def verify_cmd(pdf_path="", image_path="", txt_path=""):
+def verify(pdf_path="", image_path="", txt_path=""):
     if image_path:
         verifier = GreenPassVerifier.from_qr(image_path)
     elif pdf_path:
@@ -134,9 +134,8 @@ def verify_cmd(pdf_path="", image_path="", txt_path=""):
         ctx = click.get_current_context()
         click.echo(ctx.get_help())
         ctx.exit()
-
     verifier.verify()
 
 
 if __name__ == "__main__":
-    verify_cmd()
+    verify()
