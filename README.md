@@ -18,15 +18,25 @@ pipenv sync
 
 ### Usage
 
-#### Option 1 - from QR code image
+Generate a Green Pass or Vaccination Certificate at https://corona.health.gov.il/green-pass/
 
-Save your Green Pass as a `.png` file and execute:
+#### Option 1 - from PDF
+
+Directly verify your `GreenPass.pdf` or `VaccinationCertificate.pdf`:
+
+```bash
+pipenv run verify -p GreenPass.pdf
+```
+
+#### Option 2 - from QR code image
+
+Save the QR code as a `.png` file (e.g. from screenshot) and execute:
 
 ```bash
 pipenv run verify -i green_pass_image.png
 ```
 
-#### Option 2 - from QR code decoded textual content
+#### Option 3 - from QR code decoded textual content
 
 Decode the QR code payload yourself, put it in a txt file and then execute:
 
@@ -37,10 +47,10 @@ pipenv run verify -t green_pass_payload.txt
 ### Output example
 
 ```
-Valid signature!
 Israeli ID Number 012345678
 ID valid by 2021-01-01
 Cert Unique ID 01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234
+Valid signature!
 ```
 
 ## Verification Process Details
@@ -58,6 +68,8 @@ Base64EncodedSignature#{"id":"01/IL/ABCD1234ABCD1234ABCD1234ABCD1234#ABCD1234","
 Where `Base64EncodedSignature` are 256 bytes of an RSA signature signed with a 2048-bit public key and PKCS#1 v1.5 padding, followed by a `#` delimiter, and then the signed JSON payload as defined in https://github.com/MohGovIL/Ramzor#minimal-dataset
 
 ⚠️ **The current MOH implementation has a pitfall.** ⚠️ The JSON payload is not signed as is, but rather the **SHA256 hash** of the data is signed. This effectively means the payload is hashed twice, once manually, and once as part of the signature verification scheme.
+
+Some certificates now have `ct=2` which is not double hashed. This implementation supports both versions.
 
 ### Certificates
 
