@@ -1,5 +1,5 @@
-import argparse
 import base64
+import click
 import fitz
 import json
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-
+from cryptography.exceptions import InvalidSignature
 from PIL import Image
 from pyzbar import pyzbar
 
@@ -23,33 +23,52 @@ def verify(qr_code_bytes):
 
     data = json.loads(payload)
     payload = payload.decode().encode("utf8")
+
+    details = []
+
     if data["ct"] == 1:
         digest = payload
         for i in range(len(data["p"])):
-            print(f"Details of person number {i+1}:")
-            print(f"\tIsraeli ID Number {data['p'][i]['idl']}")
-            print(f"\tID valid by {data['p'][i]['e']}")
-        print(f"Cert Unique ID {data['id']}")
+            details.append(
+                {
+                    "id_num": data["p"][i]["idl"],
+                    "valid_by": data["p"][i]["e"],
+                    "cert_id": data["id"],
+                }
+            )
     elif data["ct"] == 2:
         h = hashes.Hash(hashes.SHA256())
         h.update(payload)
         digest = h.finalize()
-        print(f"Israeli ID Number {data['idl']}")
-        print(f"ID valid by {data['e']}")
-        print(f"Cert Unique ID {data['id']}")
+        details.append(
+            {
+                "id_num": data["idl"],
+                "valid_by": data["e"],
+                "cert_id": data["id"],
+            }
+        )
+
     else:
-        print("Unsupported certificate type")
+        click.secho("Unsupported certificate type", fg="red")
+        return
+
+    for d in details:
+        click.echo(f"\tIsraeli ID Number {d['id_num']}")
+        click.echo(f"\tID valid by {d['valid_by']}")
+        click.echo(f"\tCert Unique ID {d['cert_id']}")
 
     with open(cert("RamzorQRPubKey.pem"), "rb") as f:
         k = serialization.load_pem_public_key(f.read())
-        k.verify(
-            sig,
-            digest,
-            padding.PKCS1v15(),
-            hashes.SHA256(),
-        )
-
-    print("Valid signature!")
+        try:
+            k.verify(
+                sig,
+                digest,
+                padding.PKCS1v15(),
+                hashes.SHA256(),
+            )
+            click.secho("Valid signature!", fg="green", bold=True)
+        except InvalidSignature:
+            click.secho("Invalid signature!", fg="red", bold=True)
 
 
 def read_qr_code(image_path):
@@ -70,41 +89,33 @@ def read_pdf(pdf_path):
                 return read_qr_code(BytesIO(data))
 
 
-def create_arg_parser():
-    parser = argparse.ArgumentParser("Green Pass QR code verifier")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "-i",
-        "--image-path",
-        type=Path,
-        help="Path to an image with the QR code",
-        default=None,
-    )
-    group.add_argument(
-        "-p",
-        "--pdf-path",
-        type=Path,
-        help="Path to PDF file",
-        default=None,
-    )
-    group.add_argument(
-        "-t",
-        "--txt-path",
-        type=Path,
-        help="Path to decoded QR code textual content",
-        default=None,
-    )
-    return parser
+@click.command()
+@click.option("-p", "--pdf-path", type=click.Path(exists=True), help="Path to PDF file")
+@click.option(
+    "-i",
+    "--image-path",
+    type=click.Path(exists=True),
+    help="Path to an image with the QR code",
+)
+@click.option(
+    "-t",
+    "--txt-path",
+    type=click.Path(exists=True),
+    help="Path to decoded QR code textual content",
+)
+def verify_cmd(pdf_path="", image_path="", txt_path=""):
+    if image_path:
+        verify(read_qr_code(image_path))
+    elif pdf_path:
+        verify(read_pdf(pdf_path))
+    elif txt_path:
+        with open(txt_path, "rb") as f:
+            verify(f.read().strip())
+    else:
+        ctx = click.get_current_context()
+        click.echo(ctx.get_help())
+        ctx.exit()
 
 
 if __name__ == "__main__":
-    parser = create_arg_parser()
-    args = parser.parse_args()
-
-    if args.image_path:
-        verify(read_qr_code(args.image_path))
-    elif args.pdf_path:
-        verify(read_pdf(args.pdf_path))
-    elif args.txt_path:
-        with open(args.txt_path, "rb") as f:
-            verify(f.read().strip())
+    verify_cmd()

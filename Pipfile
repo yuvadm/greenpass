@@ -8,6 +8,8 @@ cryptography = "*"
 pillow = "*"
 pyzbar = "*"
 pymupdf = "*"
+click = "*"
+colorama = "*"
 
 [dev-packages]
 
