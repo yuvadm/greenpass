@@ -1,5 +1,6 @@
 import argparse
 import base64
+import fitz
 import json
 
 from pathlib import Path
@@ -54,6 +55,12 @@ def read_qr_code(image_path):
     return pyzbar.decode(Image.open(image_path))[0].data
 
 
+def read_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    for (xref, *_) in doc.get_page_images(0, full=True):
+        img = fitz.Pixmap(doc, xref)
+        img.writePNG(f"{xref}.png")
+
 def create_arg_parser():
     parser = argparse.ArgumentParser("Green Pass QR code verifier")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -62,6 +69,13 @@ def create_arg_parser():
         "--image-path",
         type=Path,
         help="Path to an image with the QR code",
+        default=None,
+    )
+    group.add_argument(
+        "-p",
+        "--pdf-path",
+        type=Path,
+        help="Path to PDF file",
         default=None,
     )
     group.add_argument(
@@ -80,6 +94,8 @@ if __name__ == "__main__":
 
     if args.image_path:
         verify(read_qr_code(args.image_path))
+    elif args.pdf_path:
+        read_pdf(args.pdf_path)
     elif args.txt_path:
         with open(args.txt_path, "rb") as f:
             verify(f.read().strip())
