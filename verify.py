@@ -15,6 +15,8 @@ from pyzbar import pyzbar
 
 class GreenPassVerifier(object):
     def __init__(self, data_bytes):
+        self.validate_bytes(data_bytes)
+
         sig, self.payload = data_bytes.split(b"#", maxsplit=1)
         self.signature = base64.decodebytes(sig)
         self.data = json.loads(self.payload)
@@ -47,6 +49,15 @@ class GreenPassVerifier(object):
                     img = fitz.Pixmap(doc, xref)
                     data = img.getImageData(output="png")
                     return cls.from_qr(BytesIO(data))
+
+    def validate_bytes(self, bs):
+        if bs.decode().startswith("GreenPass"):
+            click.secho(
+                "⚠️  Green pass QR code contains no signature to verify",
+                fg="yellow",
+                bold=True,
+            )
+            click.get_current_context().exit()
 
     def validate_data(self):
         ct = self.data["ct"]
