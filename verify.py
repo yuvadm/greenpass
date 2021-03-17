@@ -51,7 +51,8 @@ class GreenPassVerifier(object):
     def validate_data(self):
         ct = self.data["ct"]
         if ct not in (1, 2):
-            raise Exception(f"Unsupported certificate type ct={ct}")
+            click.secho(f"Unknown certificate type ct={ct}", fg="red", bold=True)
+            click.get_current_context().exit()
 
     def get_cert_path(self, name):
         return Path(__file__).absolute().parent / "certs" / name
