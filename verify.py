@@ -19,9 +19,24 @@ def verify(qr_code_bytes):
     b64, payload = qr_code_bytes.split(b"#", maxsplit=1)
     sig = base64.decodebytes(b64)
 
-    h = hashes.Hash(hashes.SHA256())
-    h.update(payload.decode().encode("utf8"))
-    digest = h.finalize()
+    data = json.loads(payload)
+    payload = payload.decode().encode("utf8")
+    if data["ct"] == 1:
+        digest = payload
+        for i in range(len(data["p"])):
+            print(f"Details of person number {i+1}:")
+            print(f"\tIsraeli ID Number {data['p'][i]['idl']}")
+            print(f"\tID valid by {data['p'][i]['e']}")
+        print(f"Cert Unique ID {data['id']}")
+    elif data["ct"] == 2:
+        h = hashes.Hash(hashes.SHA256())
+        h.update(payload)
+        digest = h.finalize()
+        print(f"Israeli ID Number {data['idl']}")
+        print(f"ID valid by {data['e']}")
+        print(f"Cert Unique ID {data['id']}")
+    else:
+        print("Unsupported certificate type")
 
     with open(cert("RamzorQRPubKey.pem"), "rb") as f:
         k = serialization.load_pem_public_key(f.read())
@@ -33,20 +48,6 @@ def verify(qr_code_bytes):
         )
 
     print("Valid signature!")
-
-    data = json.loads(payload)
-    if data["ct"] == 1:
-        for i in range(len(data["p"])):
-            print(f"Details of person number {i+1}:")
-            print(f"\tIsraeli ID Number {data['p'][i]['idl']}")
-            print(f"\tID valid by {data['p'][i]['e']}")
-        print(f"Cert Unique ID {data['id']}")
-    elif data["ct"] == 2:
-        print(f"Israeli ID Number {data['idl']}")
-        print(f"ID valid by {data['e']}")
-        print(f"Cert Unique ID {data['id']}")
-    else:
-        print("Unsupported certificate type")
 
 
 def read_qr_code(image_path):
