@@ -7,7 +7,7 @@ from io import BytesIO
 from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import padding, ec
 from cryptography.exceptions import InvalidSignature
 from PIL import Image
 from pyzbar import pyzbar
@@ -25,7 +25,8 @@ class GreenPassVerifier(object):
         self.details = self.get_details()
         self.digest = self.get_digest()
 
-        self.cert = self.get_cert_path("RamzorQRPubKey.pem")
+        self.ec_cert = self.get_cert_path("IL-NB-DSC-01.pem")
+        self.rsa_cert = self.get_cert_path("RamzorQRPubKey.pem")
 
     @classmethod
     def from_payload(cls, path):
@@ -43,6 +44,7 @@ class GreenPassVerifier(object):
             for img in doc.get_page_images(i):
                 xref, width = img[0], img[2]
                 if width in (
+                    3080,  # in green pass v2
                     3720,  # in green pass
                     4200,  # in vaccination certificate
                 ):
@@ -106,18 +108,27 @@ class GreenPassVerifier(object):
             click.echo(f"\tID valid by {d['valid_by']}")
             click.echo(f"\tCert Unique ID {d['cert_id']}")
 
-        with open(self.cert, "rb") as f:
-            k = serialization.load_pem_public_key(f.read())
-            try:
-                k.verify(
-                    self.signature,
-                    self.digest,
+        certs = [
+            [
+                self.rsa_cert,
+                [
                     padding.PKCS1v15(),
                     hashes.SHA256(),
-                )
-                click.secho("✅ Valid signature!", fg="green", bold=True)
-            except InvalidSignature:
-                click.secho("❌ Invalid signature!", fg="red", bold=True)
+                ],
+            ],
+            [self.ec_cert, [ec.ECDSA(hashes.SHA256())]],
+        ]
+        for cert, method in certs:
+            with open(cert, "rb") as f:
+                k = serialization.load_pem_public_key(f.read())
+                try:
+                    k.verify(self.signature, self.digest, *method)
+                    click.secho("✅ Valid signature!", fg="green", bold=True)
+                    break
+                except InvalidSignature:
+                    pass
+        else:
+            click.secho("❌ Invalid signature!", fg="red", bold=True)
 
 
 @click.command()
