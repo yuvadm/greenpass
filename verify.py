@@ -47,6 +47,7 @@ class GreenPassVerifier(object):
                     3080,  # in green pass v2
                     3720,  # in green pass
                     4200,  # in vaccination certificate
+                    4680,  # in other vaccination certificate
                 ):
                     img = fitz.Pixmap(doc, xref)
                     data = img.getImageData(output="png")
