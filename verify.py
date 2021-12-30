@@ -50,7 +50,7 @@ class GreenPassVerifier(object):
                     4680,  # in other vaccination certificate
                 ):
                     img = fitz.Pixmap(doc, xref)
-                    data = img.getImageData(output="png")
+                    data = img.tobytes(output="png")
                     return cls.from_qr(BytesIO(data))
 
     def validate_bytes(self, bs):
