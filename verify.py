@@ -17,6 +17,7 @@ class GreenPassVerifier(object):
     def __init__(self, data_bytes):
         self.validate_bytes(data_bytes)
 
+        print(data_bytes)
         sig, self.payload = data_bytes.split(b"#", maxsplit=1)
         self.signature = base64.decodebytes(sig)
         self.data = json.loads(self.payload)
@@ -43,15 +44,16 @@ class GreenPassVerifier(object):
         for i in range(len(doc)):
             for img in doc.get_page_images(i):
                 xref, width = img[0], img[2]
-                if width in (
-                    3080,  # in green pass v2
-                    3720,  # in green pass
-                    4200,  # in vaccination certificate
-                    4680,  # in other vaccination certificate
-                ):
+                try:
                     img = fitz.Pixmap(doc, xref)
                     data = img.tobytes(output="png")
+                    with open(f"/tmp/greenpass/{xref}.png", "wb") as f:
+                        f.write(data)
                     return cls.from_qr(BytesIO(data))
+                except:
+                    pass
+            else:
+                raise Exception("No QR found")
 
     def validate_bytes(self, bs):
         if bs.decode().startswith("GreenPass"):
