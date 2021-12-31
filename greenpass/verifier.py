@@ -1,5 +1,4 @@
 import base64
-
 import fitz
 import json
 
@@ -17,7 +16,6 @@ class GreenPassVerifier(object):
     def __init__(self, data_bytes):
         self.validate_bytes(data_bytes)
 
-        print(data_bytes)
         sig, self.payload = data_bytes.split(b"#", maxsplit=1)
         self.signature = base64.decodebytes(sig)
         self.data = json.loads(self.payload)
@@ -50,25 +48,25 @@ class GreenPassVerifier(object):
                     with open(f"/tmp/greenpass/{xref}.png", "wb") as f:
                         f.write(data)
                     return cls.from_qr(BytesIO(data))
-                except:
+                except IndexError:
                     pass
             else:
                 raise Exception("No QR found")
 
     def validate_bytes(self, bs):
         if bs.decode().startswith("GreenPass"):
-            click.secho(
-                "⚠️  Green pass QR code contains no signature to verify",
-                fg="yellow",
-                bold=True,
-            )
-            click.get_current_context().exit()
+            raise Exception("Green pass QR code contains no signature to verify")
+            # click.secho(
+            #     "⚠️  ",
+            #     fg="yellow",
+            #     bold=True,
+            # )
+            # click.get_current_context().exit()
 
     def validate_data(self):
         ct = self.data["ct"]
         if ct not in (1, 2):
-            click.secho(f"Unknown certificate type ct={ct}", fg="red", bold=True)
-            click.get_current_context().exit()
+            raise Exception(f"Unknown certificate type {ct=}")
 
     def get_cert_path(self, name):
         return Path(__file__).absolute().parent / "certs" / name
@@ -107,9 +105,9 @@ class GreenPassVerifier(object):
 
     def verify(self):
         for d in self.details:
-            click.echo(f"\tIsraeli ID Number {d['id_num']}")
-            click.echo(f"\tID valid by {d['valid_by']}")
-            click.echo(f"\tCert Unique ID {d['cert_id']}")
+            print(f"\tIsraeli ID Number {d['id_num']}")
+            print(f"\tID valid by {d['valid_by']}")
+            print(f"\tCert Unique ID {d['cert_id']}")
 
         certs = [
             [
@@ -126,9 +124,8 @@ class GreenPassVerifier(object):
                 k = serialization.load_pem_public_key(f.read())
                 try:
                     k.verify(self.signature, self.digest, *method)
-                    click.secho("✅ Valid signature!", fg="green", bold=True)
-                    break
+                    return True
                 except InvalidSignature:
                     pass
         else:
-            click.secho("❌ Invalid signature!", fg="red", bold=True)
+            return False

@@ -28,4 +28,9 @@ def verify(pdf_path="", image_path="", txt_path=""):
         ctx = click.get_current_context()
         click.echo(ctx.get_help())
         ctx.exit()
-    verifier.verify()
+
+    valid = verifier.verify()
+    if valid:
+        click.secho("✅ Valid signature!", fg="green", bold=True)
+    else:
+        click.secho("❌ Invalid signature!", fg="red", bold=True)
