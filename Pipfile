@@ -12,6 +12,9 @@ click = "*"
 colorama = "*"
 
 [dev-packages]
+pytest = "*"
+black = "*"
 
 [scripts]
-verify = "python verify.py"
+greenpass = "python -m greenpass"
+test = "pytest"

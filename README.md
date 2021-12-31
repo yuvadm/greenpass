@@ -25,7 +25,7 @@ Generate a Green Pass or Vaccination Certificate at https://corona.health.gov.il
 Directly verify your `GreenPass.pdf` or `VaccinationCertificate.pdf`:
 
 ```bash
-$ pipenv run verify -p GreenPass.pdf
+$ pipenv run greenpass -p GreenPass.pdf
 ```
 
 #### Option 2 - from QR code image
@@ -33,7 +33,7 @@ $ pipenv run verify -p GreenPass.pdf
 Save the QR code as a `.png` file (e.g. from screenshot) and execute:
 
 ```bash
-$ pipenv run verify -i green_pass_image.png
+$ pipenv run greenpass -i green_pass_image.png
 ```
 
 #### Option 3 - from QR code decoded textual content
@@ -41,7 +41,7 @@ $ pipenv run verify -i green_pass_image.png
 Decode the QR code payload yourself, put it in a txt file and then execute:
 
 ```bash
-$ pipenv run verify -t green_pass_payload.txt
+$ pipenv run greenpass -t green_pass_payload.txt
 ```
 
 ### Output example
