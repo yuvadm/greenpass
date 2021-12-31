@@ -27,10 +27,6 @@ class GreenPassVerifier(object):
         self.ec_cert = self.get_cert_path("IL-NB-DSC-01.pem")
         self.rsa_cert = self.get_cert_path("RamzorQRPubKey.pem")
 
-    def validate_bytes(self, bs):
-        if bs.decode().startswith("GreenPass"):
-            raise Exception("Green pass QR code contains no signature to verify")
-
     def validate_data(self):
         ct = self.data["ct"]
         if ct not in (1, 2):

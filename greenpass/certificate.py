@@ -47,7 +47,7 @@ class CertificateData(object):
 
     def verify(self):
         # EU certs start with HC1
-        if self.data.startswith("HC1"):
+        if self.data.startswith("HC1:"):
             return EuroVerifier(self.data)
         else:
             try:
