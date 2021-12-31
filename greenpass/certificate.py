@@ -37,8 +37,6 @@ class CertificateData(object):
                 try:
                     img = fitz.Pixmap(doc, xref)
                     data = img.tobytes(output="png")
-                    with open(f"/tmp/greenpass/{xref}.png", "wb") as f:
-                        f.write(data)
                     return cls.from_qr(BytesIO(data))
                 except IndexError:
                     pass
