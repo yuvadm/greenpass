@@ -17,7 +17,7 @@ from .verifiers.eu import EuroVerifier
 
 class CertificateData(object):
     def __init__(self, data):
-        self.data = data_bytes
+        self.data = data
 
     @classmethod
     def from_payload(cls, path):
