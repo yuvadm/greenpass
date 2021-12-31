@@ -4,3 +4,6 @@ class Verifier(object):
 
     def verify(self):
         raise NotImplementedError()
+
+    def get_cert_path(self, name):
+        return Path(__file__).absolute().parent / "certs" / name
