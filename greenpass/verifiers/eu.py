@@ -1,0 +1,2 @@
+class EuroVerifier(object):
+    pass

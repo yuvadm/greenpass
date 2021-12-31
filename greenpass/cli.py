@@ -1,5 +1,6 @@
 import click
 
+from .certificate import CertificateData
 from .verifier import GreenPassVerifier
 
 
@@ -19,11 +20,11 @@ from .verifier import GreenPassVerifier
 )
 def verify(pdf_path="", image_path="", txt_path=""):
     if image_path:
-        verifier = GreenPassVerifier.from_qr(image_path)
+        data = CertificateData.from_qr(image_path)
     elif pdf_path:
-        verifier = GreenPassVerifier.from_pdf(pdf_path)
+        data = CertificateData.from_pdf(pdf_path)
     elif txt_path:
-        verifier = GreenPassVerifier.from_payload(txt_path)
+        data = CertificateData.from_payload(txt_path)
     else:
         ctx = click.get_current_context()
         click.echo(ctx.get_help())

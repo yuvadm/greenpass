@@ -1,0 +1,2 @@
+class IsraeliVerifier(object):
+    pass

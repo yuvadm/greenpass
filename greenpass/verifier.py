@@ -27,41 +27,9 @@ class GreenPassVerifier(object):
         self.ec_cert = self.get_cert_path("IL-NB-DSC-01.pem")
         self.rsa_cert = self.get_cert_path("RamzorQRPubKey.pem")
 
-    @classmethod
-    def from_payload(cls, path):
-        with open(path, "rb") as f:
-            return cls(f.read().strip())
-
-    @classmethod
-    def from_qr(cls, path):
-        return cls(pyzbar.decode(Image.open(path))[0].data)
-
-    @classmethod
-    def from_pdf(cls, path):
-        doc = fitz.open(path)
-        for i in range(len(doc)):
-            for img in doc.get_page_images(i):
-                xref, width = img[0], img[2]
-                try:
-                    img = fitz.Pixmap(doc, xref)
-                    data = img.tobytes(output="png")
-                    with open(f"/tmp/greenpass/{xref}.png", "wb") as f:
-                        f.write(data)
-                    return cls.from_qr(BytesIO(data))
-                except IndexError:
-                    pass
-            else:
-                raise Exception("No QR found")
-
     def validate_bytes(self, bs):
         if bs.decode().startswith("GreenPass"):
             raise Exception("Green pass QR code contains no signature to verify")
-            # click.secho(
-            #     "⚠️  ",
-            #     fg="yellow",
-            #     bold=True,
-            # )
-            # click.get_current_context().exit()
 
     def validate_data(self):
         ct = self.data["ct"]

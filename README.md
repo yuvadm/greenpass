@@ -1,14 +1,11 @@
-# Green Pass - התו הירוק
+# Green Pass
 
-Signature verification for the Green Pass (התו הירוק).
+COVID pass verification library and CLI. Implements verification for:
 
-As (not really) specified in https://github.com/MohGovIL/Ramzor
+  - [EU Digital COVID certificates](https://ec.europa.eu/health/ehealth/covid-19_en)
+  - [Legacy Israeli Green Pass certificates](https://github.com/MohGovIL/Ramzor)
 
-## Verification Script
-
-A pythonic implementation of the verification process can be found in [`verify.py`](verify.py).
-
-### Setup
+## Setup
 
 Install [`pipenv`](https://pipenv.pypa.io/en/latest/) and sync the required dependencies:
 
@@ -16,11 +13,11 @@ Install [`pipenv`](https://pipenv.pypa.io/en/latest/) and sync the required depe
 $ pipenv sync
 ```
 
-### Usage
+### CLI Usage
 
-Generate a Green Pass or Vaccination Certificate at https://corona.health.gov.il/green-pass/
+The CLI tool accepts PDF files, PNG images and raw QR code decoded contents.
 
-#### Option 1 - from PDF
+#### PDF Certificates
 
 Directly verify your `GreenPass.pdf` or `VaccinationCertificate.pdf`:
 
@@ -28,7 +25,7 @@ Directly verify your `GreenPass.pdf` or `VaccinationCertificate.pdf`:
 $ pipenv run greenpass -p GreenPass.pdf
 ```
 
-#### Option 2 - from QR code image
+#### QR Code Images
 
 Save the QR code as a `.png` file (e.g. from screenshot) and execute:
 
@@ -36,7 +33,7 @@ Save the QR code as a `.png` file (e.g. from screenshot) and execute:
 $ pipenv run greenpass -i green_pass_image.png
 ```
 
-#### Option 3 - from QR code decoded textual content
+#### Decoded QR Code Content
 
 Decode the QR code payload yourself, put it in a txt file and then execute:
 
